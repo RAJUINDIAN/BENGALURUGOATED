@@ -2,16 +2,16 @@ import streamlit as st
 import pandas as pd
 
 # ----------------------------------------------------
-# 1️⃣ FUNCTION TO LOAD CORRECT BACKGROUND VIDEO
+# 1️⃣ SET BACKGROUND VIDEO BASED ON WEATHER TYPE
 # ----------------------------------------------------
 def set_background(weather_choice):
     if weather_choice == "Rainfall":
-        video_file = "rain.mp4"
+        video_name = "rain.mp4"
     else:
-        video_file = "tempature.mp4"
+        video_name = "tempature.mp4"
 
     # GitHub RAW video link
-    video_url = f"https://raw.githubusercontent.com/USERNAME/REPO/main/{video_file}"
+    video_url = f"https://raw.githubusercontent.com/USERNAME/REPO/main/{video_name}"
 
     st.markdown(
         f"""
@@ -26,21 +26,19 @@ def set_background(weather_choice):
     )
 
 # ----------------------------------------------------
-# 2️⃣ LOAD DATASET
+# 2️⃣ LOAD DATA
 # ----------------------------------------------------
 df = pd.read_csv("DATASET_BEN.csv")
 df['date'] = pd.to_datetime(df['date'])
 
-# Add year & month columns
-df["year"] = df["date"].dt.year
+# Extract month
 df["month"] = df["date"].dt.month
 
-st.title("Weather Summary App - Bengaluru")
+st.title("Bengaluru Weather Summary")
 
 # ----------------------------------------------------
-# 3️⃣ USER INPUT SELECTION
+# 3️⃣ USER INPUTS (Month + Weather Type)
 # ----------------------------------------------------
-year = st.selectbox("Select Year", sorted(df["year"].unique()))
 month = st.selectbox("Select Month (1–12)", range(1, 13))
 
 weather_type = st.selectbox(
@@ -48,16 +46,16 @@ weather_type = st.selectbox(
     ["Rainfall", "Temperature"]
 )
 
-# Set background video dynamically
+# Apply background video
 set_background(weather_type)
 
 # ----------------------------------------------------
-# 4️⃣ FILTER DATA
+# 4️⃣ FILTER DATA BY MONTH ONLY
 # ----------------------------------------------------
-filtered = df[(df["year"] == year) & (df["month"] == month)]
+filtered = df[df["month"] == month]
 
 # ----------------------------------------------------
-# 5️⃣ CALCULATE RESULT
+# 5️⃣ CALCULATE AVERAGE VALUES
 # ----------------------------------------------------
 if weather_type == "Rainfall":
     avg_value = filtered["precipitation"].mean()
@@ -67,15 +65,15 @@ else:
     label = "Average Temperature (°C)"
 
 # ----------------------------------------------------
-# 6️⃣ DISPLAY RESULT
+# 6️⃣ SHOW RESULT
 # ----------------------------------------------------
-st.subheader(f"Weather Summary for {month}/{year}")
+st.subheader(f"Result for Month: {month}")
 
 if filtered.empty:
-    st.error("No data available for this month/year.")
+    st.error("No data available for this month.")
 else:
     st.metric(label, f"{avg_value:.2f}")
 
-# Extra: Show raw data
-with st.expander("Show Data Table"):
+# Optional: Show data
+with st.expander("Show Raw Data"):
     st.write(filtered)
