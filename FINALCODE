@@ -40,7 +40,7 @@ weather_type = st.selectbox(
 
 # Set background video
 if weather_type == "Temperature":
-    add_bg_video("sunny.mp4")   # Upload to GitHub repo
+    add_bg_video("tempature.mp4")   # Upload to GitHub repo
 elif weather_type == "Rainy":
     add_bg_video("rainy.mp4")   # Upload to GitHub repo
 
