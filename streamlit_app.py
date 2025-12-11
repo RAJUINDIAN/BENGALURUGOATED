@@ -4,9 +4,10 @@ import pandas as pd
 # ----------------------------
 # Load your dataset
 # ----------------------------
+
 @st.cache_data
 def load_data():
-   df = pd.read_csv("DSG1_combodata.csv")  # Replace with your dataset
+    df = pd.read_csv("DSG1_combodata.csv")
     df['date'] = pd.to_datetime(df['date'])
     df['year'] = df['date'].dt.year
     df['month'] = df['date'].dt.month
