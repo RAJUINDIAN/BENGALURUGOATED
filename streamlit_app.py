@@ -1,13 +1,12 @@
 import streamlit as st
 import pandas as pd
-
+import os
 # ----------------------------
 # Load your dataset
 # ----------------------------
 
 @st.cache_data
 def load_data():
-import os
 st.write(os.listdir("."))
     df['date'] = pd.to_datetime(df['date'])
     df['year'] = df['date'].dt.year
