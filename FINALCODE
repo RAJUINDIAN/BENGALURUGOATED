@@ -27,7 +27,7 @@ def add_bg_video(video_file):
             min-width: 100%;
             min-height: 100%;
             z-index: -1;">
-            <source src="{video_file}" type="video/mp4">
+            <source src="{}" type="video/mp4">
         </video>
     """
     st.markdown(video_html, unsafe_allow_html=True)
@@ -42,7 +42,7 @@ weather_type = st.selectbox(
 if weather_type == "Temperature":
     add_bg_video("tempature.mp4")   # Upload to GitHub repo
 elif weather_type == "Rainy":
-    add_bg_video("rainy.mp4")   # Upload to GitHub repo
+    add_bg_video("rain.mp4")   # Upload to GitHub repo
 
 
 # ----------------------------
