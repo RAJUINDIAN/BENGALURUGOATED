@@ -1,0 +1,6 @@
+date,temp_max,temp_min,humidity,pressure,wind_speed,rainfall,weather
+2024-12-01,28.1,17.2,62,1012,3.5,0.0,Clear
+2024-12-02,27.5,16.8,65,1011,4.1,2.1,Light Rain
+2024-12-03,26.9,17.0,68,1013,3.2,0.0,Clear
+2024-12-04,27.2,16.5,70,1010,4.0,5.4,Moderate Rain
+2024-12-05,28.0,17.1,64,1012,3.8,0.0,Clear
