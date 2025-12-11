@@ -1,13 +1,12 @@
 import streamlit as st
 import pandas as pd
-import os
+
 # ----------------------------
 # Load your dataset
 # ----------------------------
-
 @st.cache_data
 def load_data():
-st.write(os.listdir("."))
+    df = pd.read_csv("DASH_comeback.csv")
     df['date'] = pd.to_datetime(df['date'])
     df['year'] = df['date'].dt.year
     df['month'] = df['date'].dt.month
@@ -33,28 +32,52 @@ def add_bg_video(video_file):
     """
     st.markdown(video_html, unsafe_allow_html=True)
 
-# User chooses weather type
-weather_type = st.selectbox(
-    "Select Weather Type",
-    ["Temperature", "Rainy"]
-)
+# ----------------------------
+# UI Selection
+# ----------------------------
+st.title("🌦 Weather Dashboard – Bengaluru")
 
-# Set background video
+weather_type = st.selectbox("Select Weather Type", ["Temperature", "Rainfall"])
+
 if weather_type == "Temperature":
-    add_bg_video("tempature.mp4")   # Make sure this file is uploaded
-elif weather_type == "Rainy":
-    add_bg_video("rain.mp4")        # Make sure this file is uploaded
+    add_bg_video("tempature.mp4")
+else:
+    add_bg_video("rain.mp4")
 
+# Date selection
+year = st.selectbox("Select Year", sorted(df['year'].unique()))
+month = st.selectbox("Select Month", sorted(df['month'].unique()))
+day = st.selectbox("Select Day", sorted(df['day'].unique()))
 
 # ----------------------------
-# Input Section
+# Filter Data
 # ----------------------------
-st.title("Weather Report System")
+filtered = df[
+    (df['year'] == year) &
+    (df['month'] == month) &
+    (df['day'] == day)
+]
 
-city = st.selectbox("Select City", ["Bengalurugoated", "Chennai", "Vizag"])  # Change names if needed
+# ----------------------------
+# Output
+# ----------------------------
+if filtered.empty:
+    st.warning("No data found for this date.")
+else:
+    row = filtered.iloc[0]
 
-month = st.number_input("Enter Month (1–12)", min_value=1, max_value=12, step=1)
-year = st.number_input("Enter Year (2015–2024)", min_value=2015, max_value=2024, step=1)
+    st.success(f"Weather for {row['date'].date()}")
 
-# -
+    if weather_type == "Temperature":
+        st.metric("Max Temperature", f"{row['temp_max']} °C")
+        st.metric("Min Temperature", f"{row['temp_min']} °C")
 
+    else:
+        st.metric("Rainfall", f"{row['rainfall']} mm")
+
+    # Extra info
+    st.subheader("Additional Weather Parameters")
+    st.write(f"**Humidity:** {row['humidity']} %")
+    st.write(f"**Pressure:** {row['pressure']} hPa")
+    st.write(f"**Wind Speed:** {row['wind_speed']} m/s")
+    st.write(f"**Condition:** {row['weather']}")
