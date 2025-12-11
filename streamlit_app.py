@@ -6,7 +6,7 @@ import pandas as pd
 # ----------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv("weather_data.csv")   # Replace with your dataset
+   df = pd.read_csv("DSG1_combodata.csv")  # Replace with your dataset
     df['date'] = pd.to_datetime(df['date'])
     df['year'] = df['date'].dt.year
     df['month'] = df['date'].dt.month
