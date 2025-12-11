@@ -1,83 +1,76 @@
 import streamlit as st
 import pandas as pd
 
-# ----------------------------
-# Load your dataset
-# ----------------------------
-@st.cache_data
-def load_data():
-    df = pd.read_csv("DASH_comeback.csv")
-    df['date'] = pd.to_datetime(df['date'])
-    df['year'] = df['date'].dt.year
-    df['month'] = df['date'].dt.month
-    df['day'] = df['date'].dt.day
-    return df
+# ----------------------------------------------------
+# 1️⃣ PAGE SETTINGS + BACKGROUND VIDEO (from GitHub repo)
+# ----------------------------------------------------
+video_url = "https://raw.githubusercontent.com/USERNAME/REPO/main/video.mp4"  
+# 🔼 Replace with your RAW GitHub video link
 
-df = load_data()
+st.markdown(
+    f"""
+    <style>
+        .stApp {{
+            background: url('{video_url}') no-repeat center center fixed;
+            background-size: cover;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-# ----------------------------
-# Background Video Based on Weather Type
-# ----------------------------
-def add_bg_video(video_file):
-    video_html = f"""
-        <video autoplay muted loop id="bg-video" style="
-            position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100%;
-            min-height: 100%;
-            z-index: -1;">
-            <source src="{video_file}" type="video/mp4">
-        </video>
-    """
-    st.markdown(video_html, unsafe_allow_html=True)
+# ----------------------------------------------------
+# 2️⃣ IMPORT DATA
+# ----------------------------------------------------
+df = pd.read_csv("DATASET_BEN.csv")
+df['date'] = pd.to_datetime(df['date'])
 
-# ----------------------------
-# UI Selection
-# ----------------------------
-st.title("🌦 Weather Dashboard – Bengaluru")
+# ----------------------------------------------------
+# 3️⃣ CREATE YEAR & MONTH OPTIONS
+# ----------------------------------------------------
+df["year"] = df["date"].dt.year
+df["month"] = df["date"].dt.month
 
-weather_type = st.selectbox("Select Weather Type", ["Temperature", "Rainfall"])
+st.title("Weather Summary App - Bengaluru")
 
-if weather_type == "Temperature":
-    add_bg_video("tempature.mp4")
+# ----------------------------------------------------
+# 4️⃣ USER INPUTS
+# ----------------------------------------------------
+year = st.selectbox("Select Year", sorted(df["year"].unique()))
+month = st.selectbox("Select Month (1–12)", range(1, 13))
+
+weather_type = st.selectbox(
+    "Select Weather Type",
+    ["Rainfall", "Temperature"]
+)
+
+# ----------------------------------------------------
+# 5️⃣ FILTER DATA
+# ----------------------------------------------------
+filtered = df[(df["year"] == year) & (df["month"] == month)]
+
+# ----------------------------------------------------
+# 6️⃣ OUTPUT CALCULATION
+# ----------------------------------------------------
+if weather_type == "Rainfall":
+    avg_value = filtered["precipitation"].mean()
+    label = "Average Rainfall (mm)"
 else:
-    add_bg_video("rain.mp4")
+    avg_value = filtered["temperature_mean"].mean()
+    label = "Average Temperature (°C)"
 
-# Date selection
-year = st.selectbox("Select Year", sorted(df['year'].unique()))
-month = st.selectbox("Select Month", sorted(df['month'].unique()))
-day = st.selectbox("Select Day", sorted(df['day'].unique()))
+# ----------------------------------------------------
+# 7️⃣ SHOW OUTPUT
+# ----------------------------------------------------
+st.subheader(f"Result for {month}/{year}")
 
-# ----------------------------
-# Filter Data
-# ----------------------------
-filtered = df[
-    (df['year'] == year) &
-    (df['month'] == month) &
-    (df['day'] == day)
-]
-
-# ----------------------------
-# Output
-# ----------------------------
 if filtered.empty:
-    st.warning("No data found for this date.")
+    st.error("No data available for selected month/year.")
 else:
-    row = filtered.iloc[0]
+    st.metric(label, f"{avg_value:.2f}")
 
-    st.success(f"Weather for {row['date'].date()}")
-
-    if weather_type == "Temperature":
-        st.metric("Max Temperature", f"{row['temp_max']} °C")
-        st.metric("Min Temperature", f"{row['temp_min']} °C")
-
-    else:
-        st.metric("Rainfall", f"{row['rainfall']} mm")
-
-    # Extra info
-    st.subheader("Additional Weather Parameters")
-    st.write(f"**Humidity:** {row['humidity']} %")
-    st.write(f"**Pressure:** {row['pressure']} hPa")
-    st.write(f"**Wind Speed:** {row['wind_speed']} m/s")
-    st.write(f"**Condition:** {row['weather']}")
+# ----------------------------------------------------
+# 8️⃣ EXPANDER TO SHOW DATA
+# ----------------------------------------------------
+with st.expander("Show Raw Data"):
+    st.write(filtered)
