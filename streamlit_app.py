@@ -2,39 +2,43 @@ import streamlit as st
 import pandas as pd
 
 # ----------------------------------------------------
-# 1️⃣ PAGE SETTINGS + BACKGROUND VIDEO (from GitHub repo)
+# 1️⃣ FUNCTION TO LOAD CORRECT BACKGROUND VIDEO
 # ----------------------------------------------------
-video_url = "https://raw.githubusercontent.com/USERNAME/REPO/main/video.mp4"  
-# 🔼 Replace with your RAW GitHub video link
+def set_background(weather_choice):
+    if weather_choice == "Rainfall":
+        video_file = "rain.mp4"
+    else:
+        video_file = "tempature.mp4"
 
-st.markdown(
-    f"""
-    <style>
-        .stApp {{
-            background: url('{video_url}') no-repeat center center fixed;
-            background-size: cover;
-        }}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+    # GitHub RAW video link
+    video_url = f"https://raw.githubusercontent.com/USERNAME/REPO/main/{video_file}"
+
+    st.markdown(
+        f"""
+        <style>
+            .stApp {{
+                background: url('{video_url}') no-repeat center center fixed;
+                background-size: cover;
+            }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 # ----------------------------------------------------
-# 2️⃣ IMPORT DATA
+# 2️⃣ LOAD DATASET
 # ----------------------------------------------------
 df = pd.read_csv("DATASET_BEN.csv")
 df['date'] = pd.to_datetime(df['date'])
 
-# ----------------------------------------------------
-# 3️⃣ CREATE YEAR & MONTH OPTIONS
-# ----------------------------------------------------
+# Add year & month columns
 df["year"] = df["date"].dt.year
 df["month"] = df["date"].dt.month
 
 st.title("Weather Summary App - Bengaluru")
 
 # ----------------------------------------------------
-# 4️⃣ USER INPUTS
+# 3️⃣ USER INPUT SELECTION
 # ----------------------------------------------------
 year = st.selectbox("Select Year", sorted(df["year"].unique()))
 month = st.selectbox("Select Month (1–12)", range(1, 13))
@@ -44,13 +48,16 @@ weather_type = st.selectbox(
     ["Rainfall", "Temperature"]
 )
 
+# Set background video dynamically
+set_background(weather_type)
+
 # ----------------------------------------------------
-# 5️⃣ FILTER DATA
+# 4️⃣ FILTER DATA
 # ----------------------------------------------------
 filtered = df[(df["year"] == year) & (df["month"] == month)]
 
 # ----------------------------------------------------
-# 6️⃣ OUTPUT CALCULATION
+# 5️⃣ CALCULATE RESULT
 # ----------------------------------------------------
 if weather_type == "Rainfall":
     avg_value = filtered["precipitation"].mean()
@@ -60,17 +67,15 @@ else:
     label = "Average Temperature (°C)"
 
 # ----------------------------------------------------
-# 7️⃣ SHOW OUTPUT
+# 6️⃣ DISPLAY RESULT
 # ----------------------------------------------------
-st.subheader(f"Result for {month}/{year}")
+st.subheader(f"Weather Summary for {month}/{year}")
 
 if filtered.empty:
-    st.error("No data available for selected month/year.")
+    st.error("No data available for this month/year.")
 else:
     st.metric(label, f"{avg_value:.2f}")
 
-# ----------------------------------------------------
-# 8️⃣ EXPANDER TO SHOW DATA
-# ----------------------------------------------------
-with st.expander("Show Raw Data"):
+# Extra: Show raw data
+with st.expander("Show Data Table"):
     st.write(filtered)
