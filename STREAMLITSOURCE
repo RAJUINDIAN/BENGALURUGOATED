@@ -1,0 +1,72 @@
+import streamlit as st
+import pandas as pd
+
+# ---- PAGE CONFIG ----
+st.set_page_config(page_title="Weather Dashboard", layout="wide")
+
+# ---- BACKGROUND VIDEO HANDLING ----
+def add_bg_video(video_file):
+    video_html = f"""
+    <video autoplay loop muted playsinline style="position: fixed;
+        right: 0; bottom: 0; min-width: 100%; min-height: 100%; z-index:-1;">
+        <source src="{video_file}" type="video/mp4">
+    </video>
+    """
+    st.markdown(video_html, unsafe_allow_html=True)
+
+# ---- WEATHER VIDEOS ----
+TEMP_VIDEO = "main1.mp4"         # background for temperature
+RAIN_VIDEO = "rain.mp4"          # background for rainfall
+
+# ---- UI HEADER ----
+st.title("🌦️ Weather Dashboard (2010–2024 Data + Future AI Prediction)")
+
+# ---- LOAD CSV FILE ----
+@st.cache_data
+def load_data():
+    return pd.read_csv("DSG1_combodata.csv")
+
+df = load_data()
+
+# ---- SIDE INPUT ----
+st.sidebar.header("Select Options")
+
+city = st.sidebar.selectbox("City", df["City"].unique())
+month = st.sidebar.selectbox("Month", df["Month"].unique())
+year = st.sidebar.selectbox("Year", df["Year"].unique())
+
+weather_type = st.sidebar.radio(
+    "Select weather type:",
+    ("Temperature", "Rainfall")
+)
+
+# ---- BACKGROUND VIDEO CHANGE ----
+if weather_type == "Temperature":
+    add_bg_video(TEMP_VIDEO)
+else:
+    add_bg_video(RAIN_VIDEO)
+
+# ---- FILTER DATA ----
+filtered = df[(df["City"] == city) & (df["Month"] == month) & (df["Year"] == year)]
+
+# ---- SHOW RESULT ----
+st.subheader(f"📌 Weather Result for {city} - {month} {year}")
+
+if filtered.empty:
+    st.warning("No data found for this selection.")
+else:
+    if weather_type == "Temperature":
+        st.metric("Average Temperature (°C)", float(filtered["Temperature"].values[0]))
+    else:
+        st.metric("Average Rainfall (mm)", float(filtered["Rainfall"].values[0]))
+
+# ---- FUTURE PREDICTION (DEMO AI) ----
+st.subheader("🤖 Future AI Prediction for 2025")
+
+if st.button("Predict for Dec 2025"):
+    if weather_type == "Temperature":
+        st.success("Predicted Temperature (Dec 2025): 28.4°C")
+    else:
+        st.success("Predicted Rainfall (Dec 2025): 112 mm")
+
+st.caption("Note: AI prediction is a demo. Replace with your ML model later.")
