@@ -1,0 +1,78 @@
+streamlit_app.py
+import streamlit as st
+import pandas as pd
+
+# ----------------------------
+# Load your dataset
+# ----------------------------
+@st.cache_data
+def load_data():
+    df = pd.read_csv("weather_data.csv")   # Replace with your 10-year dataset
+    df['date'] = pd.to_datetime(df['date'])
+    df['year'] = df['date'].dt.year
+    df['month'] = df['date'].dt.month
+    df['day'] = df['date'].dt.day
+    return df
+
+df = load_data()
+
+# ----------------------------
+# Background Video Based on Weather Type
+# ----------------------------
+def add_bg_video(video_file):
+    video_html = f"""
+        <video autoplay muted loop id="bg-video" style="
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;">
+            <source src="{}" type="FINALFRONT.mp4">
+        </video>
+    """
+    st.markdown(video_html, unsafe_allow_html=True)
+
+# User chooses weather type
+weather_type = st.selectbox(
+    "Select Weather Type",
+    ["Temperature", "Rainy"]
+)
+
+# Set background video
+if weather_type == "Temperature":
+    add_bg_video("tempature.mp4")   # Upload to GitHub repo
+elif weather_type == "Rainy":
+    add_bg_video("rain.mp4")   # Upload to GitHub repo
+
+
+# ----------------------------
+# Input Section
+# ----------------------------
+st.title("Weather Report System")
+
+city = st.selectbox("Select City", ["Bengaluru", "Chennai", "Vizag"])
+
+month = st.number_input("Enter Month (1–12)", min_value=1, max_value=12, step=1)
+year = st.number_input("Enter Year (2015–2024)", min_value=2015, max_value=2024, step=1)
+
+
+# ----------------------------
+# Filter Dataset
+# ----------------------------
+filtered = df[(df['city'] == city) & (df['month'] == month) & (df['year'] == year)]
+
+if filtered.empty:
+    st.warning("No data available for this selection.")
+else:
+    st.success(f"Showing Average Weather for {city} - {month}/{year}")
+
+    if weather_type == "Temperature":
+        avg_max = filtered['temp_max'].mean()
+        avg_min = filtered['temp_min'].mean()
+        st.metric("Average Max Temperature", f"{avg_max:.2f} °C")
+        st.metric("Average Min Temperature", f"{avg_min:.2f} °C")
+
+    elif weather_type == "Rainy":
+        avg_rain = filtered['rainfall'].mean()
+        st.metric("Average Rainfall", f"{avg_rain:.2f} mm")
