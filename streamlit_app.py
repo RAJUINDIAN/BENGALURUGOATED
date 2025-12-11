@@ -28,7 +28,7 @@ def add_bg_video(video_file):
             min-width: 100%;
             min-height: 100%;
             z-index: -1;">
-            <source src="{}" type="FINALFRONT.mp4">
+            <source src="{video_file}" type="FINALFRONT.mp4">
         </video>
     """
     st.markdown(video_html, unsafe_allow_html=True)
